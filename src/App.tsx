@@ -16,14 +16,16 @@ const App = () => {
   const [success, setSuccess] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "completed" | "inWork">("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const showMessage = (type: "error" | "success", message: string) => {
-    if (type === "error") setError(message);
-    if (type === "success") setSuccess(message);
-
-    setTimeout(() => {
-      type === "error" ? setError("") : setSuccess("");
-    }, 2000);
+  const showMessage = (type: "error" | "success", message: string): void => {
+    if (type === "error") {
+      setError(message);
+      setTimeout(() => setError(""), 2000);
+    } else if (type === "success") {
+      setSuccess(message);
+      setTimeout(() => setSuccess(""), 2000);
+    }
   };
+
   useEffect(() => {
     fetchTasks();
   }, [filter]);
@@ -37,7 +39,9 @@ const App = () => {
         setTodoInfo(data.info);
       }
     } catch (error) {
-      showMessage("error", error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : "Неизвестная ошибка";
+      showMessage("error", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +54,9 @@ const App = () => {
       fetchTasks();
       showMessage("success", "Задача успешно добавлена");
     } catch (error) {
-      showMessage("error", error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : "Неизвестная ошибка";
+      showMessage("error", errorMessage);
     }
   };
   const handleUpdateTaskText = async (id: number, newText: string) => {
@@ -61,7 +67,11 @@ const App = () => {
       );
       showMessage("success", "Текст задачи успешно обновлен");
     } catch (error) {
-      showMessage("error", "Ошибка при обновлении текста задачи");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Ошибка при обновлении текста задачи";
+      showMessage("error", errorMessage);
     }
   };
 
@@ -76,7 +86,9 @@ const App = () => {
       fetchTasks();
       showMessage("success", "Задача успешно обновлена");
     } catch (error) {
-      showMessage("error", error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : "Неизвестная ошибка";
+      showMessage("error", errorMessage);
     }
   };
 
@@ -86,7 +98,9 @@ const App = () => {
       fetchTasks();
       showMessage("success", "Задача успешно удалена");
     } catch (error) {
-      showMessage("error", error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : "Неизвестная ошибка";
+      showMessage("error", errorMessage);
     }
   };
 

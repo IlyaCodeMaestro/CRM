@@ -2,7 +2,9 @@ const API_BASE_URL = "https://easydev.club/api/v1";
 
 import { Todo, TodoInfo, TodoRequest, MetaResponse } from "../types/todo";
 
-export const getTasks = async (filter: "all" | "completed" | "inWork"): Promise<MetaResponse<Todo, TodoInfo>> => {
+export const getTasks = async (
+  filter: "all" | "completed" | "inWork"
+): Promise<MetaResponse<Todo, TodoInfo>> => {
   try {
     const response = await fetch(`${API_BASE_URL}/todos?filter=${filter}`);
     if (!response.ok) {
@@ -10,7 +12,11 @@ export const getTasks = async (filter: "all" | "completed" | "inWork"): Promise<
     }
     return await response.json();
   } catch (error) {
-    throw new Error(error.message || "Произошла ошибка при запросе задач");
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Произошла ошибка при запросе задач";
+    throw new Error(errorMessage);
   }
 };
 
@@ -28,11 +34,18 @@ export const addTask = async (todoRequest: TodoRequest): Promise<Todo> => {
     }
     return await response.json();
   } catch (error) {
-    throw new Error(error.message || "Произошла ошибка при создании задачи");
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Произошла ошибка при создании задачи";
+    throw new Error(errorMessage);
   }
 };
 
-export const updateTask = async (id: number, todoRequest: TodoRequest): Promise<Todo> => {
+export const updateTask = async (
+  id: number,
+  todoRequest: TodoRequest
+): Promise<Todo> => {
   try {
     const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
       method: "PUT",
@@ -46,7 +59,11 @@ export const updateTask = async (id: number, todoRequest: TodoRequest): Promise<
     }
     return await response.json();
   } catch (error) {
-    throw new Error(error.message || "Произошла ошибка при обновлении задачи");
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Произошла ошибка при обновлении задачи";
+    throw new Error(errorMessage);
   }
 };
 
@@ -59,6 +76,10 @@ export const deleteTask = async (id: number): Promise<void> => {
       throw new Error("Не удалось удалить задачу");
     }
   } catch (error) {
-    throw new Error(error.message || "Произошла ошибка при удалении задачи");
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Произошла ошибка при удалении задачи";
+    throw new Error(errorMessage);
   }
 };
