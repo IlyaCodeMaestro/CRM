@@ -4,9 +4,9 @@ import { Todo } from "../types/todo";
 
 interface TodoItemProps {
   task: Todo;
-  toggleTask: (id: number) => Promise<void>;
-  updateTaskText: (id: number, newText: string) => Promise<void>;
-  deleteTask: (id: number) => Promise<void>;
+  toggleTask: (id: number) => void;
+  updateTaskText: (id: number, newText: string) => void;
+  deleteTask: (id: number) => void;
 }
 
 const TodoItem: React.FC<TodoItemProps> = ({
