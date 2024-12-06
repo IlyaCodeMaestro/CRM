@@ -1,6 +1,24 @@
-import styles from "../styles/TodoItem.module.scss";
 import { useState } from "react";
 import { Todo } from "../types/todo";
+import {
+  Checkbox,
+  Input,
+  Button,
+  Typography,
+  Space,
+  Layout,
+  Row,
+  Col,
+} from "antd";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  SaveOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
+
+const { Text } = Typography;
+const { Content } = Layout;
 
 interface TodoItemProps {
   task: Todo;
@@ -54,62 +72,78 @@ const TodoItem: React.FC<TodoItemProps> = ({
       console.error("Ошибка при удалении задачи:", error);
     }
   };
+
   return (
-    <div className={styles.taskItem}>
-      <label className={styles.checkboxContainer}>
-        <input
-          type="checkbox"
-          checked={task.isDone}
-          onChange={handleToggleTask}
-        />
-        <span className={styles.checkmark}></span>
-        {isEditing ? (
-          <input
-            type="text"
-            value={editedText}
-            onChange={(e) => setEditedText(e.target.value)}
-            className={styles.editInput}
-          />
-        ) : (
-          <span
-            className={`${styles.taskText} ${
-              task.isDone ? styles.completed : ""
-            }`}
-          >
-            {task.title}
-          </span>
-        )}
-      </label>
-      <div className={styles.taskActions}>
-        {isEditing ? (
-          <>
-            <button className={styles.saveButton} onClick={handleSave}>
-              Сохранить
-            </button>
-            <button className={styles.cancelButton} onClick={handleCancel}>
-              Отмена
-            </button>
-          </>
-        ) : (
-          <button className={styles.editButton} onClick={handleEdit}>
-            <svg width="16" height="16" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+    <Layout
+      style={{
+        borderRadius: "8px",
+        marginBottom: "8px",
+      }}
+    >
+      <Content style={{ padding: "12px 16px" }}>
+        <Row align="middle" gutter={12}>
+          <Col>
+            <Checkbox checked={task.isDone} onChange={handleToggleTask} />
+          </Col>
+          <Col flex="auto">
+            {isEditing ? (
+              <Input
+                value={editedText}
+                onChange={(e) => setEditedText(e.target.value)}
               />
-            </svg>
-          </button>
-        )}
-        <button className={styles.deleteButton} onClick={handleDelete}>
-          <svg width="16" height="16" viewBox="0 0 24 24">
-            <path
-              fill="currentColor"
-              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
+            ) : (
+              <Text
+                delete={task.isDone}
+                style={{
+                  fontSize: "0.95rem",
+                  color: task.isDone ? "#999" : "#333",
+                }}
+              >
+                {task.title}
+              </Text>
+            )}
+          </Col>
+          <Col>
+            <Space size="small">
+              {isEditing ? (
+                <>
+                  <Button
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    onClick={handleSave}
+                    style={{ backgroundColor: "#4285f4" }}
+                  />
+                  <Button
+                    icon={<CloseOutlined />}
+                    onClick={handleCancel}
+                    style={{ backgroundColor: "#fbbc05" ,color:"fbbc05", borderColor:'fbbc05'}}
+                    
+                  />
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="primary"
+                    icon={<EditOutlined />}
+                    onClick={handleEdit}
+                    style={{ backgroundColor: "#4285f4" }}
+                  />
+                  <Button
+                    icon={<DeleteOutlined />}
+                    onClick={handleDelete}
+                    style={{
+                      backgroundColor: "#ea4335",
+                      borderColor: "#ea4335",
+                      color: "white",
+                    }}
+                  ></Button>
+                </>
+              )}
+            </Space>
+          </Col>
+        </Row>
+      </Content>
+    </Layout>
   );
 };
 

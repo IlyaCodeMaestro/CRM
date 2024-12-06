@@ -1,25 +1,17 @@
-import React, { useState } from "react";
-import styles from "../styles/TodoForm.module.scss";
+import  { useState } from "react";
+import { Button, Form, Input } from "antd";
 
 interface TodoFormProps {
   addTask: (text: string) => Promise<void>;
 }
 
 const TodoForm: React.FC<TodoFormProps> = ({ addTask }) => {
-  const [newTask, setNewTask] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTask.trim().length < 2 || newTask.length > 64) {
-      alert("Задача должна содержать от 2 до 64 символов");
-      return;
-    }
-
+  const handleSubmit = async (values: { task: string }) => {
     setIsSubmitting(true);
     try {
-      await addTask(newTask);
-      setNewTask("");
+      await addTask(values.task);
     } catch (error) {
       console.error("Ошибка при добавлении задачи:", error);
     } finally {
@@ -28,24 +20,26 @@ const TodoForm: React.FC<TodoFormProps> = ({ addTask }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.inputSection}>
-      <input
-        type="text"
-        value={newTask}
-        onChange={(e) => setNewTask(e.target.value)}
-        placeholder="Введите новую задачу..."
-        className={styles.taskInput}
-        disabled={isSubmitting}
-        required
-      />
-      <button
-        type="submit"
-        className={styles.addButton}
-        disabled={isSubmitting}
+    <Form onFinish={handleSubmit}>
+      <Form.Item
+        name="task"
+        rules={[
+          { required: true, message: "Пожалуйста, введите задачу" },
+          {
+            min: 2,
+            max: 64,
+            message: "Задача должна содержать от 2 до 64 символов",
+          },
+        ]}
       >
-        {isSubmitting ? "Добавление..." : "Добавить"}
-      </button>
-    </form>
+        <Input placeholder="Введите новую задачу..." disabled={isSubmitting} />
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit" loading={isSubmitting}>
+          {isSubmitting ? "Добавление..." : "Добавить"}
+        </Button>
+      </Form.Item>
+    </Form>
   );
 };
 

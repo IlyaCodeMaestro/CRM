@@ -1,16 +1,16 @@
 const API_BASE_URL = "https://easydev.club/api/v1";
 
 import { Todo, TodoInfo, TodoRequest, MetaResponse } from "../types/todo";
-
+import axios from "axios";
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
 export const getTasks = async (
   filter: "all" | "completed" | "inWork"
 ): Promise<MetaResponse<Todo, TodoInfo>> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/todos?filter=${filter}`);
-    if (!response.ok) {
-      throw new Error("Не удалось загрузить задачи");
-    }
-    return await response.json();
+    const response = await api.get(`${API_BASE_URL}/todos?filter=${filter}`);
+    return response.data;
   } catch (error) {
     const errorMessage =
       error instanceof Error
@@ -22,17 +22,8 @@ export const getTasks = async (
 
 export const addTask = async (todoRequest: TodoRequest): Promise<Todo> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/todos`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(todoRequest),
-    });
-    if (!response.ok) {
-      throw new Error("Не удалось создать задачу");
-    }
-    return await response.json();
+    const response = await api.post("/todos", todoRequest);
+    return response.data;
   } catch (error) {
     const errorMessage =
       error instanceof Error
@@ -47,17 +38,8 @@ export const updateTask = async (
   todoRequest: TodoRequest
 ): Promise<Todo> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(todoRequest),
-    });
-    if (!response.ok) {
-      throw new Error("Не удалось обновить задачу");
-    }
-    return await response.json();
+    const response = await api.put(`/todos/${id}`, todoRequest);
+    return response.data;
   } catch (error) {
     const errorMessage =
       error instanceof Error
@@ -69,12 +51,7 @@ export const updateTask = async (
 
 export const deleteTask = async (id: number): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      throw new Error("Не удалось удалить задачу");
-    }
+    await api.delete(`/todos/${id}`);
   } catch (error) {
     const errorMessage =
       error instanceof Error
