@@ -1,4 +1,3 @@
-import styles from "./styles/App.module.scss";
 import { useState, useEffect } from "react";
 import TodoList from "./components/TodoList";
 import TodoForm from "./components/TodoForm";
@@ -107,8 +106,18 @@ const App = () => {
   if (isLoading) {
     return <div>Загрузка...</div>;
   }
+
   return (
-    <div className={styles.todoApp}>
+    <div
+      style={{
+        maxWidth: "100%",
+        margin: "1rem",
+        padding: "1rem",
+        background: "white",
+        borderRadius: "12px",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <TodoForm addTask={handleAddTask} />
       <TodoTabs
         error={error}

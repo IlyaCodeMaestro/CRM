@@ -1,5 +1,7 @@
-import styles from '../styles/TodoTabs.module.scss';
-import { TodoInfo } from '../types/todo';
+import { Tabs, Alert } from "antd";
+import { TodoInfo } from "../types/todo";
+
+const { TabPane } = Tabs;
 
 interface TodoTabsProps {
   error: string;
@@ -9,31 +11,25 @@ interface TodoTabsProps {
   todoInfo: TodoInfo;
 }
 
-const TodoTabs: React.FC<TodoTabsProps> = ({ error, success, filter, setFilter, todoInfo }) => {
+const TodoTabs: React.FC<TodoTabsProps> = ({
+  error,
+  success,
+  filter,
+  setFilter,
+  todoInfo,
+}) => {
   return (
-    <div className={styles.tabsContainer}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
-      {success && <div className={styles.successMessage}>{success}</div>}
-      <div className={styles.tabs}>
-        <button 
-          className={`${styles.tab} ${filter === "all" ? styles.active : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          Всё ({todoInfo.all})
-        </button>
-        <button 
-          className={`${styles.tab} ${filter === "inWork" ? styles.active : ""}`}
-          onClick={() => setFilter("inWork")}
-        >
-          В работе ({todoInfo.inWork})
-        </button>
-        <button 
-          className={`${styles.tab} ${filter === "completed" ? styles.active : ""}`}
-          onClick={() => setFilter("completed")}
-        >
-          Сделано ({todoInfo.completed})
-        </button>
-      </div>
+    <div>
+      {error && <Alert message={error} type="error" showIcon />}
+      {success && <Alert message={success} type="success" showIcon />}
+      <Tabs
+        activeKey={filter}
+        onChange={(key) => setFilter(key as "all" | "completed" | "inWork")}
+      >
+        <TabPane tab={`Всё (${todoInfo.all})`} key="all" />
+        <TabPane tab={`В работе (${todoInfo.inWork})`} key="inWork" />
+        <TabPane tab={`Сделано (${todoInfo.completed})`} key="completed" />
+      </Tabs>
     </div>
   );
 };

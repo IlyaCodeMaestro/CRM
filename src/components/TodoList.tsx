@@ -1,6 +1,6 @@
 import TodoItem from "./TodoItem";
-import styles from "../styles/TodoList.module.scss";
 import { Todo } from "../types/todo";
+import { List } from "antd";
 
 type FilterType = "all" | "completed" | "inWork";
 interface TodoListProps {
@@ -24,17 +24,24 @@ const TodoList: React.FC<TodoListProps> = ({
   const filteredTasks = filterTasks(tasks);
 
   return (
-    <div className={styles.tasksList}>
-      {filteredTasks.map((task) => (
-        <TodoItem
-          key={task.id}
-          task={task}
-          toggleTask={toggleTask}
-          updateTaskText={updateTaskText}
-          deleteTask={deleteTask}
-        />
-      ))}
-    </div>
+    <List
+      dataSource={filteredTasks}
+      renderItem={(task) => (
+        <List.Item key={task.id} style={{ padding: 0, width: '100%' }}>
+          <TodoItem
+            task={task}
+            toggleTask={toggleTask}
+            updateTaskText={updateTaskText}
+            deleteTask={deleteTask}
+          />
+        </List.Item>
+      )}
+      style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    />
   );
 };
 
