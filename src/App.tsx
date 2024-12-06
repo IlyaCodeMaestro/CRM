@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 import TodoList from "./components/TodoList";
 import TodoForm from "./components/TodoForm";
 import TodoTabs from "./components/TodoTabs";
 import { Todo, TodoInfo } from "./types/todo";
 import { getTasks, addTask, updateTask, deleteTask } from "./api/api";
+import { Layout, Menu } from "antd";
+const { Content, Sider } = Layout;
 const App = () => {
   const [tasks, setTasks] = useState<Todo[]>([]);
   const [todoInfo, setTodoInfo] = useState<TodoInfo>({
@@ -27,6 +31,12 @@ const App = () => {
 
   useEffect(() => {
     fetchTasks();
+    const intervalId = setInterval(() => {
+      fetchTasks();
+    }, 5000);
+    setTimeout(() => {
+      clearInterval(intervalId);
+    }, 10000);
   }, [filter]);
 
   const fetchTasks = async () => {
@@ -106,34 +116,62 @@ const App = () => {
   if (isLoading) {
     return <div>Загрузка...</div>;
   }
-
+  const menuItems = [
+    {
+      label: <Link to="/">Список задач</Link>,
+      key: "1",
+      icon: <UnorderedListOutlined />,
+    },
+    {
+      label: <Link to="/profile">Профиль</Link>,
+      key: "2",
+      icon: <UserOutlined />,
+    },
+  ];
   return (
-    <div
-      style={{
-        maxWidth: "100%",
-        margin: "1rem",
-        padding: "1rem",
-        background: "white",
-        borderRadius: "12px",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-      }}
-    >
-      <TodoForm addTask={handleAddTask} />
-      <TodoTabs
-        error={error}
-        success={success}
-        filter={filter}
-        setFilter={setFilter}
-        todoInfo={todoInfo}
-      />
-      <TodoList
-        tasks={tasks}
-        filter={filter}
-        toggleTask={handleToggleTask}
-        updateTaskText={handleUpdateTaskText}
-        deleteTask={handleDeleteTask}
-      />
-    </div>
+    <Router>
+      <Layout style={{ minHeight: "100vh" }}>
+        <Sider>
+          <Menu
+            theme="dark"
+            mode="inline"
+            defaultSelectedKeys={["1"]}
+            items={menuItems}
+          />
+        </Sider>
+        <Layout>
+          <Content
+            style={{ margin: "24px 16px", padding: 24, background: "#fff" }}
+          >
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <TodoForm addTask={handleAddTask} />
+                    <TodoTabs
+                      error={error}
+                      success={success}
+                      filter={filter}
+                      setFilter={setFilter}
+                      todoInfo={todoInfo}
+                    />
+                    <TodoList
+                      tasks={tasks}
+                      filter={filter}
+                      toggleTask={handleToggleTask}
+                      updateTaskText={handleUpdateTaskText}
+                      deleteTask={handleDeleteTask}
+                    />
+                  </>
+                }
+              />
+              <Route path="/profile" element={<div>Привет!</div>} />
+            </Routes>
+          </Content>
+        </Layout>
+      </Layout>
+    </Router>
   );
 };
 

@@ -1,8 +1,5 @@
 import { Tabs, Alert } from "antd";
 import { TodoInfo } from "../types/todo";
-
-const { TabPane } = Tabs;
-
 interface TodoTabsProps {
   error: string;
   success: string;
@@ -18,6 +15,21 @@ const TodoTabs: React.FC<TodoTabsProps> = ({
   setFilter,
   todoInfo,
 }) => {
+  const tabs = [
+    {
+      label: `Всё (${todoInfo.all})`,
+      key: "all",
+    },
+    {
+      label: `В работе (${todoInfo.inWork})`,
+      key: "inWork",
+    },
+    {
+      label: `Сделано (${todoInfo.completed})`,
+      key: "completed",
+    },
+  ];
+
   return (
     <div>
       {error && <Alert message={error} type="error" showIcon />}
@@ -25,13 +37,9 @@ const TodoTabs: React.FC<TodoTabsProps> = ({
       <Tabs
         activeKey={filter}
         onChange={(key) => setFilter(key as "all" | "completed" | "inWork")}
-      >
-        <TabPane tab={`Всё (${todoInfo.all})`} key="all" />
-        <TabPane tab={`В работе (${todoInfo.inWork})`} key="inWork" />
-        <TabPane tab={`Сделано (${todoInfo.completed})`} key="completed" />
-      </Tabs>
+        items={tabs} 
+      />
     </div>
   );
 };
-
 export default TodoTabs;
