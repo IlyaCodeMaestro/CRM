@@ -30,14 +30,16 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchTasks();
-    const intervalId = setInterval(() => {
+    const fetchData = () => {
       fetchTasks();
-    }, 5000);
-    setTimeout(() => {
-      clearInterval(intervalId);
-    }, 10000);
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => {
+      clearInterval(interval); 
+    };
   }, [filter]);
+  
 
   const fetchTasks = async () => {
     setIsLoading(true);
