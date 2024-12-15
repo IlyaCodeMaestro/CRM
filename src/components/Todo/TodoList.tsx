@@ -1,7 +1,7 @@
 import TodoItem from "./TodoItem";
 import { Todo } from "../../types/todo";
 import { List } from "antd";
-//gfgf
+
 type FilterType = "all" | "completed" | "inWork";
 interface TodoListProps {
   tasks: Todo[];

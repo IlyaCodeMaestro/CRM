@@ -1,14 +1,26 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { useState, useEffect, ReactNode } from "react";
+import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
-import TodoList from "./components/TodoList";
-import TodoForm from "./components/TodoForm";
-import TodoTabs from "./components/TodoTabs";
+import TodoList from "./components/Todo/TodoList";
+import TodoForm from "./components/Todo/TodoForm";
+import TodoTabs from "./components/Todo/TodoTabs";
+import AuthPage from "./components/Auth/AuthPage";
 import { Todo, TodoInfo } from "./types/todo";
-import { getTasks, addTask, updateTask, deleteTask } from "./api/api";
+import { getTasks, addTask, updateTask, deleteTask } from "./api/todoApi";
 import { Layout, Menu } from "antd";
+import { useLocation } from "react-router-dom";
+import { RootState } from "./store/store";
+import { useSelector } from "react-redux";
+import ProfilePage from "./components/Profile/ProfilePage";
+
 const { Content, Sider } = Layout;
+
 const App = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector((state: RootState) => !!state.auth.token);
+  const isLoadingAuth = useSelector((state: RootState) => state.auth.loading);
+  const token = useSelector((state: RootState) => state.auth.token);
   const [tasks, setTasks] = useState<Todo[]>([]);
   const [todoInfo, setTodoInfo] = useState<TodoInfo>({
     all: 0,
@@ -19,6 +31,7 @@ const App = () => {
   const [success, setSuccess] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "completed" | "inWork">("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const showMessage = (type: "error" | "success", message: string): void => {
     if (type === "error") {
       setError(message);
@@ -28,18 +41,21 @@ const App = () => {
       setTimeout(() => setSuccess(""), 2000);
     }
   };
-
+ 
   useEffect(() => {
-    const fetchData = () => {
-      fetchTasks();
-    };
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
+    if (
+      !isAuthenticated ||
+      location.pathname === "/login" ||
+      location.pathname === "/register"
+    ) {
+      return;
+    }
+    fetchTasks();
+    const interval = setInterval(fetchTasks, 5000);
     return () => {
-      clearInterval(interval); 
+      clearInterval(interval);
     };
-  }, [filter]);
-  
+  }, [isAuthenticated, location.pathname, filter]);
 
   const fetchTasks = async () => {
     setIsLoading(true);
@@ -70,6 +86,7 @@ const App = () => {
       showMessage("error", errorMessage);
     }
   };
+
   const handleUpdateTaskText = async (id: number, newText: string) => {
     try {
       const updatedTask = await updateTask(id, { title: newText });
@@ -115,66 +132,113 @@ const App = () => {
     }
   };
 
-  if (isLoading) {
-    return <div>Загрузка...</div>;
+  if (isLoadingAuth) {
+    return <div>Проверка аутентификации...</div>;
+  }
+
+  if (
+    !isAuthenticated &&
+    !location.pathname.includes("/login") &&
+    !location.pathname.includes("/register")
+  ) {
+    return <Navigate to="/login" />;
   }
   const menuItems = [
     {
-      label: <Link to="/">Список задач</Link>,
+      label: <span style={{ color: "black" }}>Список задач</span>,
       key: "1",
-      icon: <UnorderedListOutlined />,
+      icon: <UnorderedListOutlined style={{ color: "black" }} />,
+      onClick: () => navigate("/"),
     },
     {
-      label: <Link to="/profile">Профиль</Link>,
+      label: <span style={{ color: "black" }}>Личный кабинет</span>,
       key: "2",
-      icon: <UserOutlined />,
+      icon: <UserOutlined style={{ color: "black" }} />,
+      onClick: () => navigate("/profile"),
     },
   ];
-  return (
-    <Router>
+
+  const LayoutWithSidebar = ({ children }: { children: ReactNode }) => {
+    const location = useLocation();
+    const selectedKey = location.pathname === "/profile" ? "2" : "1";
+    return (
       <Layout style={{ minHeight: "100vh" }}>
-        <Sider>
+        <Sider style={{ backgroundColor: "white" }}>
           <Menu
-            theme="dark"
+            theme="light"
             mode="inline"
-            defaultSelectedKeys={["1"]}
+            selectedKeys={[selectedKey]}
             items={menuItems}
           />
         </Sider>
         <Layout>
           <Content
-            style={{ margin: "24px 16px", padding: 24, background: "#fff" }}
+            style={{
+              margin: "24px 16px",
+              padding: 24,
+              background: "#fff",
+            }}
           >
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <>
-                    <TodoForm addTask={handleAddTask} />
-                    <TodoTabs
-                      error={error}
-                      success={success}
-                      filter={filter}
-                      setFilter={setFilter}
-                      todoInfo={todoInfo}
-                    />
-                    <TodoList
-                      tasks={tasks}
-                      filter={filter}
-                      toggleTask={handleToggleTask}
-                      updateTaskText={handleUpdateTaskText}
-                      deleteTask={handleDeleteTask}
-                    />
-                  </>
-                }
-              />
-              <Route path="/profile" element={<div>Привет!</div>} />
-            </Routes>
+            {children}
           </Content>
         </Layout>
       </Layout>
-    </Router>
+    );
+  };
+
+  return (
+    <Routes>
+      <Route path="/login" element={<AuthPage isLogin={true} />} />
+      <Route path="/register" element={<AuthPage isLogin={false} />} />
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <LayoutWithSidebar>
+              <TodoForm addTask={handleAddTask} />
+              {isLoading ? (
+                <div>Загрузка...</div>
+              ) : (
+                <>
+                  <TodoTabs
+                    error={error}
+                    success={success}
+                    filter={filter}
+                    setFilter={setFilter}
+                    todoInfo={todoInfo}
+                  />
+                  <TodoList
+                    tasks={tasks}
+                    filter={filter}
+                    toggleTask={handleToggleTask}
+                    updateTaskText={handleUpdateTaskText}
+                    deleteTask={handleDeleteTask}
+                  />
+                </>
+              )}
+            </LayoutWithSidebar>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          isAuthenticated ? (
+            <LayoutWithSidebar>
+              {token ? (
+                <ProfilePage token={token.access} />
+              ) : (
+                <div>Токен не найден. Пожалуйста, войдите в систему.</div>
+              )}
+            </LayoutWithSidebar>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+    </Routes>
   );
 };
-//fgfg
 export default App;
