@@ -12,7 +12,6 @@ import { useLocation } from "react-router-dom";
 import { RootState } from "./store/store";
 import { useSelector } from "react-redux";
 import ProfilePage from "./components/Profile/ProfilePage";
-
 const { Content, Sider } = Layout;
 
 const App = () => {
@@ -20,7 +19,6 @@ const App = () => {
   const navigate = useNavigate();
   const isAuthenticated = useSelector((state: RootState) => !!state.auth.token);
   const isLoadingAuth = useSelector((state: RootState) => state.auth.loading);
-  const token = useSelector((state: RootState) => state.auth.token);
   const [tasks, setTasks] = useState<Todo[]>([]);
   const [todoInfo, setTodoInfo] = useState<TodoInfo>({
     all: 0,
@@ -41,7 +39,7 @@ const App = () => {
       setTimeout(() => setSuccess(""), 2000);
     }
   };
- 
+
   useEffect(() => {
     if (
       !isAuthenticated ||
@@ -185,7 +183,6 @@ const App = () => {
       </Layout>
     );
   };
-
   return (
     <Routes>
       <Route path="/login" element={<AuthPage isLogin={true} />} />
@@ -227,11 +224,9 @@ const App = () => {
         element={
           isAuthenticated ? (
             <LayoutWithSidebar>
-              {token ? (
-                <ProfilePage token={token.access} />
-              ) : (
-                <div>Токен не найден. Пожалуйста, войдите в систему.</div>
-              )}
+              <ProfilePage />
+
+              <div>Токен не найден. Пожалуйста, войдите в систему.</div>
             </LayoutWithSidebar>
           ) : (
             <Navigate to="/login" />

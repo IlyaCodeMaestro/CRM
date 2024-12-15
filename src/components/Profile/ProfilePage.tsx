@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
-import { fetchUserProfile } from "../../api/authApi";
 import { Profile } from "../../types/auth";
-
-const UserProfile: React.FC<{ token: string }> = ({ token }) => {
+const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const getProfile = async () => {
       try {
-        const fetchedProfile = await fetchUserProfile(token);
-        setProfile(fetchedProfile);
+        const fetchedProfile = await fetch("/api/profile");
+        const profileData = await fetchedProfile.json();
+        setProfile(profileData);
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err.message || "Ошибка при загрузке профиля");
@@ -21,7 +20,7 @@ const UserProfile: React.FC<{ token: string }> = ({ token }) => {
     };
 
     getProfile();
-  }, [token]);
+  }, []);
 
   if (error) {
     return <p>Ошибка: {error}</p>;
@@ -41,4 +40,4 @@ const UserProfile: React.FC<{ token: string }> = ({ token }) => {
   );
 };
 
-export default UserProfile;
+export default ProfilePage;
