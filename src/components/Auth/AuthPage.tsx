@@ -9,6 +9,7 @@ import {
 } from "../../slices/authSlice";
 import { RootState } from "../../store/store";
 import { ThunkDispatch } from "@reduxjs/toolkit";
+import skeleton from '../../assets/images/skeleton.svg'
 
 const { Title, Text } = Typography;
 
@@ -19,7 +20,7 @@ const pageStyle: React.CSSProperties = {
 
 const imageStyle: React.CSSProperties = {
   flex: 1,
-  backgroundImage: "url(../../../../assets/images/skeleton.svg)",
+  backgroundImage: `url(${skeleton})`,
   backgroundSize: "cover",
   backgroundPosition: "center",
 };
@@ -33,7 +34,7 @@ const formContainerStyle: React.CSSProperties = {
 };
 
 const getFormStyle = (isLogin: boolean): React.CSSProperties => ({
-  width: isLogin ? 450 : 500, 
+  width: isLogin ? 450 : 500,
   padding: 20,
   border: "1px solid #ddd",
   borderRadius: 8,
@@ -114,7 +115,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ isLogin = false }) => {
     <div style={pageStyle}>
       <div style={imageStyle}></div>
       <div style={formContainerStyle}>
-      <div style={getFormStyle(isLogin)}>
+        <div style={getFormStyle(isLogin)}>
           <Title level={3}>{isLogin ? "Вход" : "Регистрация"}</Title>
           <Form form={form} layout="vertical" onFinish={handleSubmit}>
             {!isLogin && (
