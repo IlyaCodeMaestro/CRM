@@ -1,22 +1,21 @@
-import { useState, useEffect, ReactNode } from "react";
-import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
-import { UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import { useState, useEffect, useCallback } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import TodoList from "./components/Todo/TodoList";
 import TodoForm from "./components/Todo/TodoForm";
 import TodoTabs from "./components/Todo/TodoTabs";
-import AuthPage from "./components/Auth/AuthPage";
 import { Todo, TodoInfo } from "./types/todo";
 import { getTasks, addTask, updateTask, deleteTask } from "./api/todoApi";
-import { Layout, Menu } from "antd";
-import { useLocation } from "react-router-dom";
 import { RootState } from "./store/store";
 import { useSelector } from "react-redux";
 import ProfilePage from "./components/Profile/ProfilePage";
-const { Content, Sider } = Layout;
+import Sidebar from "./components/Layout/SidebarLayout";
+import RegisterForm from "./components/Auth/RegisterForm";
+import AuthForm from "./components/Auth/AuthForm";
+import { notification } from "antd";
+import { useLocation } from "react-router-dom";
 
 const App = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const isAuthenticated = useSelector((state: RootState) => !!state.auth.token);
   const isLoadingAuth = useSelector((state: RootState) => state.auth.loading);
   const [tasks, setTasks] = useState<Todo[]>([]);
@@ -25,20 +24,35 @@ const App = () => {
     completed: 0,
     inWork: 0,
   });
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "completed" | "inWork">("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const showMessage = (type: "error" | "success", message: string): void => {
-    if (type === "error") {
-      setError(message);
-      setTimeout(() => setError(""), 2000);
-    } else if (type === "success") {
-      setSuccess(message);
-      setTimeout(() => setSuccess(""), 2000);
-    }
+  const showNotification = (
+    type: "error" | "success",
+    message: string,
+    description?: string
+  ): void => {
+    notification[type]({
+      message,
+      description,
+    });
   };
+  const fetchTasks = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await getTasks(filter);
+      setTasks(data.data);
+      if (data.info) {
+        setTodoInfo(data.info);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Неизвестная ошибка";
+      showNotification("error", "Ошибка загрузки задач", errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filter]);
 
   useEffect(() => {
     if (
@@ -53,35 +67,18 @@ const App = () => {
     return () => {
       clearInterval(interval);
     };
-  }, [isAuthenticated, location.pathname, filter]);
-
-  const fetchTasks = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getTasks(filter);
-      setTasks(data.data);
-      if (data.info) {
-        setTodoInfo(data.info);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [isAuthenticated, location.pathname, filter, fetchTasks]);
 
   const handleAddTask = async (text: string) => {
     try {
       const newTask = await addTask({ title: text });
       setTasks((prev) => [...prev, newTask]);
       fetchTasks();
-      showMessage("success", "Задача успешно добавлена");
+      showNotification("success", "Задача успешно добавлена");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка добавления задачи", errorMessage);
     }
   };
 
@@ -91,13 +88,13 @@ const App = () => {
       setTasks((prevTasks) =>
         prevTasks.map((task) => (task.id === id ? updatedTask : task))
       );
-      showMessage("success", "Текст задачи успешно обновлен");
+      showNotification("success", "Текст задачи успешно обновлен");
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Ошибка при обновлении текста задачи";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка обновления задачи", errorMessage);
     }
   };
 
@@ -110,11 +107,11 @@ const App = () => {
         isDone: !taskToToggle.isDone,
       });
       fetchTasks();
-      showMessage("success", "Задача успешно обновлена");
+      showNotification("success", "Задача успешно обновлена");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка обновления задачи", errorMessage);
     }
   };
 
@@ -122,11 +119,11 @@ const App = () => {
     try {
       await deleteTask(id);
       fetchTasks();
-      showMessage("success", "Задача успешно удалена");
+      showNotification("success", "Задача успешно удалена");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка удаления задачи", errorMessage);
     }
   };
 
@@ -134,72 +131,21 @@ const App = () => {
     return <div>Проверка аутентификации...</div>;
   }
 
-  if (
-    !isAuthenticated &&
-    !location.pathname.includes("/login") &&
-    !location.pathname.includes("/register")
-  ) {
-    return <Navigate to="/login" />;
-  }
-  const menuItems = [
-    {
-      label: <span style={{ color: "black" }}>Список задач</span>,
-      key: "1",
-      icon: <UnorderedListOutlined style={{ color: "black" }} />,
-      onClick: () => navigate("/"),
-    },
-    {
-      label: <span style={{ color: "black" }}>Личный кабинет</span>,
-      key: "2",
-      icon: <UserOutlined style={{ color: "black" }} />,
-      onClick: () => navigate("/profile"),
-    },
-  ];
-
-  const LayoutWithSidebar = ({ children }: { children: ReactNode }) => {
-    const location = useLocation();
-    const selectedKey = location.pathname === "/profile" ? "2" : "1";
-    return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Sider style={{ backgroundColor: "white" }}>
-          <Menu
-            theme="light"
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            items={menuItems}
-          />
-        </Sider>
-        <Layout>
-          <Content
-            style={{
-              margin: "24px 16px",
-              padding: 24,
-              background: "#fff",
-            }}
-          >
-            {children}
-          </Content>
-        </Layout>
-      </Layout>
-    );
-  };
   return (
     <Routes>
-      <Route path="/login" element={<AuthPage isLogin={true} />} />
-      <Route path="/register" element={<AuthPage isLogin={false} />} />
-      <Route
-        path="/"
-        element={
-          isAuthenticated ? (
-            <LayoutWithSidebar>
+      <Route path="/login" element={<AuthForm />} />
+      <Route path="/register" element={<RegisterForm />} />
+      <Route element={isAuthenticated ? <Sidebar /> : <Navigate to="/login" />}>
+        <Route
+          path="/"
+          element={
+            <>
               <TodoForm addTask={handleAddTask} />
               {isLoading ? (
                 <div>Загрузка...</div>
               ) : (
                 <>
                   <TodoTabs
-                    error={error}
-                    success={success}
                     filter={filter}
                     setFilter={setFilter}
                     todoInfo={todoInfo}
@@ -213,26 +159,11 @@ const App = () => {
                   />
                 </>
               )}
-            </LayoutWithSidebar>
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          isAuthenticated ? (
-            <LayoutWithSidebar>
-              <ProfilePage />
-
-              <div>Токен не найден. Пожалуйста, войдите в систему.</div>
-            </LayoutWithSidebar>
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
+            </>
+          }
+        />
+        <Route path="/profile" element={<ProfilePage />} />
+      </Route>
     </Routes>
   );
 };

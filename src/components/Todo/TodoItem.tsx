@@ -29,9 +29,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   const handleToggleTask = async () => {
     try {
       await toggleTask(task.id);
-      message.success("Статус задачи обновлён!");
     } catch (error) {
-      message.error("Ошибка при переключении задачи.");
       console.error(error);
     }
   };
@@ -49,9 +47,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
     try {
       await updateTaskText(task.id, editedText);
       setIsEditing(false);
-      message.success("Задача успешно обновлена!");
     } catch (error) {
-      message.error("Ошибка при сохранении текста задачи.");
       console.error(error);
     }
   };
@@ -59,54 +55,64 @@ const TodoItem: React.FC<TodoItemProps> = ({
   const handleCancel = () => {
     setEditedText(task.title);
     setIsEditing(false);
-    message.info("Редактирование отменено.");
   };
 
   const handleDelete = async () => {
     try {
       await deleteTask(task.id);
-      message.success("Задача успешно удалена!");
     } catch (error) {
-      message.error("Ошибка при удалении задачи.");
       console.error(error);
     }
   };
 
+  const containerStyle: React.CSSProperties = {
+    borderRadius: "8px",
+    marginBottom: "8px",
+    backgroundColor: "#fff",
+    padding: "12px 16px",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+    display: "flex",
+    justifyContent: "space-between",
+    width: "100%",
+  };
+
+  const textStyle: React.CSSProperties = {
+    fontSize: "0.95rem",
+    color: task.isDone ? "#999" : "#333",
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: "#4285f4",
+  };
+
+  const cancelButtonStyle: React.CSSProperties = {
+    backgroundColor: "#fbbc05",
+    color: "white",
+    borderColor: "#fbbc05",
+  };
+
+  const deleteButtonStyle: React.CSSProperties = {
+    backgroundColor: "#ea4335",
+    borderColor: "#ea4335",
+    color: "white",
+  };
+
   return (
-    <Space
-      direction="horizontal"
-      size="middle"
-      align="center"
-      style={{
-        borderRadius: "8px",
-        marginBottom: "8px",
-        backgroundColor: "#fff",
-        padding: "12px 16px",
-        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-        display: "flex",
-        justifyContent: "space-between",
-        width: "100%",
-      }}
-    >  <Space size="middle" style={{ flex: 1 }}>
-      <Checkbox checked={task.isDone} onChange={handleToggleTask} />
-      <div style={{ flex: "1" }}>
-        {isEditing ? (
-          <Input
-            value={editedText}
-            onChange={(e) => setEditedText(e.target.value)}
-          />
-        ) : (
-          <Text
-            delete={task.isDone}
-            style={{
-              fontSize: "0.95rem",
-              color: task.isDone ? "#999" : "#333",
-            }}
-          >
-            {task.title}
-          </Text>
-        )}
-      </div>
+    <Space direction="horizontal" size="middle" align="center" style={containerStyle}>
+      <Space size="middle" style={{ flex: 1 }}>
+        <Checkbox checked={task.isDone} onChange={handleToggleTask} />
+        <Space style={{ flex: 1 }}>
+          {isEditing ? (
+            <Input
+              value={editedText}
+              onChange={(e) => setEditedText(e.target.value)}
+            />
+          ) : (
+            <Text delete={task.isDone} style={textStyle}>
+              {task.title}
+            </Text>
+          )}
+        </Space>
       </Space>
       <Space size="small">
         {isEditing ? (
@@ -115,16 +121,12 @@ const TodoItem: React.FC<TodoItemProps> = ({
               type="primary"
               icon={<SaveOutlined />}
               onClick={handleSave}
-              style={{ backgroundColor: "#4285f4" }}
+              style={buttonStyle}
             />
             <Button
               icon={<CloseOutlined />}
               onClick={handleCancel}
-              style={{
-                backgroundColor: "#fbbc05",
-                color: "white",
-                borderColor: "#fbbc05",
-              }}
+              style={cancelButtonStyle}
             />
           </>
         ) : (
@@ -133,17 +135,13 @@ const TodoItem: React.FC<TodoItemProps> = ({
               type="primary"
               icon={<EditOutlined />}
               onClick={handleEdit}
-              style={{ backgroundColor: "#4285f4" }}
+              style={buttonStyle}
             />
             <Button
               icon={<DeleteOutlined />}
               onClick={handleDelete}
-              style={{
-                backgroundColor: "#ea4335",
-                borderColor: "#ea4335",
-                color: "white",
-              }}
-            ></Button>
+              style={deleteButtonStyle}
+            />
           </>
         )}
       </Space>

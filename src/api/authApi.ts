@@ -1,16 +1,10 @@
-const API_BASE_URL = "https://easydev.club/api/v1";
-
-import axios from "axios";
+import api from "./axiosInstance";
 import {
   AuthData,
   UserRegistration,
   Token,
   Profile,
 } from "../types/auth";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
 
 export const authenticateUser = async (authData: AuthData): Promise<Token> => {
   try {
@@ -39,13 +33,9 @@ export const registerUser = async (userData: UserRegistration): Promise<Profile>
   }
 };
 
-export const fetchUserProfile = async (token: Token): Promise<Profile> => {
+export const fetchUserProfile = async (): Promise<Profile> => {
   try {
-    const response = await api.get<Profile>("/user/profile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.get<Profile>("/user/profile");
     return response.data;
   } catch (error) {
     const errorMessage =

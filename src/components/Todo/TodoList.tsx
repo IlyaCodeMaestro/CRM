@@ -23,11 +23,22 @@ const TodoList: React.FC<TodoListProps> = ({
 
   const filteredTasks = filterTasks(tasks);
 
+  const listStyle: React.CSSProperties = {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+  };
+
+  const listItemStyle: React.CSSProperties = {
+    padding: 0,
+    width: "100%",
+  };
+
   return (
     <List
       dataSource={filteredTasks}
       renderItem={(task) => (
-        <List.Item key={task.id} style={{ padding: 0, width: "100%" }}>
+        <List.Item key={task.id} style={listItemStyle}>
           <TodoItem
             task={task}
             toggleTask={toggleTask}
@@ -36,11 +47,7 @@ const TodoList: React.FC<TodoListProps> = ({
           />
         </List.Item>
       )}
-      style={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
+      style={listStyle}
     />
   );
 };
