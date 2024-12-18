@@ -7,7 +7,7 @@ interface TodoTabsProps {
   setFilter: (filter: "all" | "completed" | "inWork") => void;
   todoInfo: TodoInfo;
 }
-//fgfg
+
 const TodoTabs: React.FC<TodoTabsProps> = ({
   error,
   success,

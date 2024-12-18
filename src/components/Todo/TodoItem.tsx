@@ -84,9 +84,10 @@ const TodoItem: React.FC<TodoItemProps> = ({
         padding: "12px 16px",
         boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
         display: "flex",
+        justifyContent: "space-between",
         width: "100%",
       }}
-    >
+    >  <Space size="middle" style={{ flex: 1 }}>
       <Checkbox checked={task.isDone} onChange={handleToggleTask} />
       <div style={{ flex: "1" }}>
         {isEditing ? (
@@ -106,6 +107,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
           </Text>
         )}
       </div>
+      </Space>
       <Space size="small">
         {isEditing ? (
           <>
