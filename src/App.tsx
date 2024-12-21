@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, Outlet } from "react-router-dom";
 import TodoList from "./components/Todo/TodoList";
 import TodoForm from "./components/Todo/TodoForm";
 import TodoTabs from "./components/Todo/TodoTabs";
@@ -13,6 +13,11 @@ import RegisterForm from "./components/Auth/RegisterForm";
 import AuthForm from "./components/Auth/AuthForm";
 import { notification } from "antd";
 import { useLocation } from "react-router-dom";
+
+const ProtectedRoute = ({isAuthenticated}: {isAuthenticated: boolean}) =>{
+  return isAuthenticated ? <Outlet/> : <Navigate to="/login"/>
+}
+
 
 const App = () => {
   const location = useLocation();
@@ -64,6 +69,7 @@ const App = () => {
     }
     fetchTasks();
     const interval = setInterval(fetchTasks, 5000);
+    
     return () => {
       clearInterval(interval);
     };
@@ -135,36 +141,38 @@ const App = () => {
     <Routes>
       <Route path="/login" element={<AuthForm />} />
       <Route path="/register" element={<RegisterForm />} />
-      <Route element={isAuthenticated ? <Sidebar /> : <Navigate to="/login" />}>
-        <Route
-          path="/"
-          element={
-            <>
-              <TodoForm addTask={handleAddTask} />
-              {isLoading ? (
-                <div>Загрузка...</div>
-              ) : (
-                <>
-                  <TodoTabs
-                    filter={filter}
-                    setFilter={setFilter}
-                    todoInfo={todoInfo}
-                  />
-                  <TodoList
-                    tasks={tasks}
-                    filter={filter}
-                    toggleTask={handleToggleTask}
-                    updateTaskText={handleUpdateTaskText}
-                    deleteTask={handleDeleteTask}
-                  />
-                </>
-              )}
-            </>
-          }
-        />
-        <Route path="/profile" element={<ProfilePage />} />
-      </Route>
-    </Routes>
-  );
-};
+      <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+        <Route element={<Sidebar />}>
+          <Route
+            path="/"
+            element={
+              <>
+                <TodoForm addTask={handleAddTask} />
+                {isLoading ? (
+                  <div>Загрузка...</div>
+                ) : (
+                  <>
+                    <TodoTabs
+                      filter={filter}
+                      setFilter={setFilter}
+                      todoInfo={todoInfo}
+                    />
+                    <TodoList
+                      tasks={tasks}
+                      filter={filter}
+                      toggleTask={handleToggleTask}
+                      updateTaskText={handleUpdateTaskText}
+                      deleteTask={handleDeleteTask}
+                    />
+                  </>
+                )}
+              </>
+             }
+             />
+            <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+          </Route>
+        </Routes>
+      );
+    };
 export default App;
