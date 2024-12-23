@@ -1,5 +1,5 @@
 import { Layout, Menu } from "antd";
-import { UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import { TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 
 
@@ -50,6 +50,12 @@ const Sidebar: React.FC = () => {
       key: "/profile",
       icon: <UserOutlined style={iconStyle} />,
       onClick: () => navigate("/profile"),
+    },
+    {
+      label: <span style={labelStyle}>Пользователи</span>,
+      key: "/users",
+      icon: <TeamOutlined style={iconStyle} />,
+      onClick: () => navigate("/users"),
     },
   ];
  
