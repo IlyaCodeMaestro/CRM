@@ -7,7 +7,7 @@ import { Todo, TodoInfo } from "./types/todo";
 import { getTasks, addTask, updateTask, deleteTask } from "./api/todoApi";
 import { RootState } from "./store/store";
 import { useSelector } from "react-redux";
-import ProfilePage from "./components/Profile/ProfilePage";
+import ProfilePage from "./components/Content/ProfilePage";
 import Sidebar from "./components/Layout/SidebarLayout";
 import RegisterForm from "./components/Auth/RegisterForm";
 import AuthForm from "./components/Auth/AuthForm";

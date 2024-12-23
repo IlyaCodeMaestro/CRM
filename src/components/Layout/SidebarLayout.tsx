@@ -2,6 +2,7 @@ import { Layout, Menu } from "antd";
 import { UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 
+
 const { Content, Sider } = Layout;
 
 const sidebarStyles: React.CSSProperties = {
@@ -51,6 +52,7 @@ const Sidebar: React.FC = () => {
       onClick: () => navigate("/profile"),
     },
   ];
+ 
 
   return (
     <Layout style={layoutStyles}>
