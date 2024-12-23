@@ -1,47 +1,48 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import { UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
-import TodoList from "./components/TodoList";
-import TodoForm from "./components/TodoForm";
-import TodoTabs from "./components/TodoTabs";
+import { useState, useEffect, useCallback } from "react";
+import { Route, Routes, Navigate, Outlet } from "react-router-dom";
+import TodoList from "./components/Todo/TodoList";
+import TodoForm from "./components/Todo/TodoForm";
+import TodoTabs from "./components/Todo/TodoTabs";
 import { Todo, TodoInfo } from "./types/todo";
-import { getTasks, addTask, updateTask, deleteTask } from "./api/api";
-import { Layout, Menu } from "antd";
-const { Content, Sider } = Layout;
+import { getTasks, addTask, updateTask, deleteTask } from "./api/todoApi";
+import { RootState } from "./store/store";
+import { useSelector } from "react-redux";
+import ProfilePage from "./components/Content/ProfilePage";
+import Sidebar from "./components/Layout/SidebarLayout";
+import RegisterForm from "./components/Auth/RegisterForm";
+import AuthForm from "./components/Auth/AuthForm";
+import { notification } from "antd";
+import { useLocation } from "react-router-dom";
+
+const ProtectedRoute = ({isAuthenticated}: {isAuthenticated: boolean}) =>{
+  return isAuthenticated ? <Outlet/> : <Navigate to="/login"/>
+}
+
+
 const App = () => {
+  const location = useLocation();
+  const isAuthenticated = useSelector((state: RootState) => !!state.auth.token);
+  const isLoadingAuth = useSelector((state: RootState) => state.auth.loading);
   const [tasks, setTasks] = useState<Todo[]>([]);
   const [todoInfo, setTodoInfo] = useState<TodoInfo>({
     all: 0,
     completed: 0,
     inWork: 0,
   });
-  const [error, setError] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "completed" | "inWork">("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const showMessage = (type: "error" | "success", message: string): void => {
-    if (type === "error") {
-      setError(message);
-      setTimeout(() => setError(""), 2000);
-    } else if (type === "success") {
-      setSuccess(message);
-      setTimeout(() => setSuccess(""), 2000);
-    }
+
+  const showNotification = (
+    type: "error" | "success",
+    message: string,
+    description?: string
+  ): void => {
+    notification[type]({
+      message,
+      description,
+    });
   };
-
-  useEffect(() => {
-    const fetchData = () => {
-      fetchTasks();
-    };
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => {
-      clearInterval(interval); 
-    };
-  }, [filter]);
-  
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await getTasks(filter);
@@ -52,37 +53,54 @@ const App = () => {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка загрузки задач", errorMessage);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      location.pathname === "/login" ||
+      location.pathname === "/register"
+    ) {
+      return;
+    }
+    fetchTasks();
+    const interval = setInterval(fetchTasks, 5000);
+    
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, location.pathname, filter, fetchTasks]);
 
   const handleAddTask = async (text: string) => {
     try {
       const newTask = await addTask({ title: text });
       setTasks((prev) => [...prev, newTask]);
       fetchTasks();
-      showMessage("success", "Задача успешно добавлена");
+      showNotification("success", "Задача успешно добавлена");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка добавления задачи", errorMessage);
     }
   };
+
   const handleUpdateTaskText = async (id: number, newText: string) => {
     try {
       const updatedTask = await updateTask(id, { title: newText });
       setTasks((prevTasks) =>
         prevTasks.map((task) => (task.id === id ? updatedTask : task))
       );
-      showMessage("success", "Текст задачи успешно обновлен");
+      showNotification("success", "Текст задачи успешно обновлен");
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Ошибка при обновлении текста задачи";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка обновления задачи", errorMessage);
     }
   };
 
@@ -95,11 +113,11 @@ const App = () => {
         isDone: !taskToToggle.isDone,
       });
       fetchTasks();
-      showMessage("success", "Задача успешно обновлена");
+      showNotification("success", "Задача успешно обновлена");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка обновления задачи", errorMessage);
     }
   };
 
@@ -107,53 +125,34 @@ const App = () => {
     try {
       await deleteTask(id);
       fetchTasks();
-      showMessage("success", "Задача успешно удалена");
+      showNotification("success", "Задача успешно удалена");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Неизвестная ошибка";
-      showMessage("error", errorMessage);
+      showNotification("error", "Ошибка удаления задачи", errorMessage);
     }
   };
 
-  if (isLoading) {
-    return <div>Загрузка...</div>;
+  if (isLoadingAuth) {
+    return <div>Проверка аутентификации...</div>;
   }
-  const menuItems = [
-    {
-      label: <Link to="/">Список задач</Link>,
-      key: "1",
-      icon: <UnorderedListOutlined />,
-    },
-    {
-      label: <Link to="/profile">Профиль</Link>,
-      key: "2",
-      icon: <UserOutlined />,
-    },
-  ];
+
   return (
-    <Router>
-      <Layout style={{ minHeight: "100vh" }}>
-        <Sider>
-          <Menu
-            theme="dark"
-            mode="inline"
-            defaultSelectedKeys={["1"]}
-            items={menuItems}
-          />
-        </Sider>
-        <Layout>
-          <Content
-            style={{ margin: "24px 16px", padding: 24, background: "#fff" }}
-          >
-            <Routes>
-              <Route
-                path="/"
-                element={
+    <Routes>
+      <Route path="/login" element={<AuthForm />} />
+      <Route path="/register" element={<RegisterForm />} />
+      <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
+        <Route element={<Sidebar />}>
+          <Route
+            path="/"
+            element={
+              <>
+                <TodoForm addTask={handleAddTask} />
+                {isLoading ? (
+                  <div>Загрузка...</div>
+                ) : (
                   <>
-                    <TodoForm addTask={handleAddTask} />
                     <TodoTabs
-                      error={error}
-                      success={success}
                       filter={filter}
                       setFilter={setFilter}
                       todoInfo={todoInfo}
@@ -166,15 +165,14 @@ const App = () => {
                       deleteTask={handleDeleteTask}
                     />
                   </>
-                }
-              />
-              <Route path="/profile" element={<div>Привет!</div>} />
-            </Routes>
-          </Content>
-        </Layout>
-      </Layout>
-    </Router>
-  );
-};
-//fgfg
+                )}
+              </>
+             }
+             />
+            <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+          </Route>
+        </Routes>
+      );
+    };
 export default App;

@@ -1,5 +1,5 @@
 const API_BASE_URL = "https://easydev.club/api/v1";
-//g
+
 import { Todo, TodoInfo, TodoRequest, MetaResponse } from "../types/todo";
 import axios from "axios";
 const api = axios.create({
