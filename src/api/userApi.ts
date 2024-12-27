@@ -59,7 +59,7 @@ export const updateUserRoles = async (
 
 export const updateUserProfile = async (
   id: number,
-  userRequest: UserRequest
+  userRequest: Partial<UserRequest>
 ): Promise<User> => {
   const token = getAuthToken();
   const response = await axios.put(

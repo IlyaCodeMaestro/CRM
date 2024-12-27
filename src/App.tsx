@@ -13,11 +13,11 @@ import RegisterForm from "./components/Auth/RegisterForm";
 import AuthForm from "./components/Auth/AuthForm";
 import { notification } from "antd";
 import { useLocation } from "react-router-dom";
+import UsersPage from "./components/Content/UsersPage";
 
-const ProtectedRoute = ({isAuthenticated}: {isAuthenticated: boolean}) =>{
-  return isAuthenticated ? <Outlet/> : <Navigate to="/login"/>
-}
-
+const ProtectedRoute = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+};
 
 const App = () => {
   const location = useLocation();
@@ -69,7 +69,7 @@ const App = () => {
     }
     fetchTasks();
     const interval = setInterval(fetchTasks, 5000);
-    
+
     return () => {
       clearInterval(interval);
     };
@@ -167,12 +167,13 @@ const App = () => {
                   </>
                 )}
               </>
-             }
-             />
-            <Route path="/profile" element={<ProfilePage />} />
-            </Route>
-          </Route>
-        </Routes>
-      );
-    };
+            }
+          />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/users" element={<UsersPage />} />
+        </Route>
+      </Route>
+    </Routes>
+  );
+};
 export default App;

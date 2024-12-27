@@ -3,8 +3,8 @@ export interface UserFilters {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
     isBlocked?: boolean;
-    limit?: number;
-    offset?: number;
+    limit: number;
+    offset: number;
   }
   
   export interface User {
