@@ -93,7 +93,7 @@ const UsersPage: React.FC = () => {
   ) => {
     const sort = Array.isArray(sorter) ? sorter[0] : sorter;
     const { field, order } = sort || {};
-    const newOffset = pagination.current || 1; // Используем номер текущей страницы как offset
+    const newOffset = pagination.current || 1; 
     updateFilters({
       offset: newOffset,
       limit: pagination.pageSize || 20,
@@ -285,7 +285,7 @@ const UsersPage: React.FC = () => {
         loading={loading}
         pagination={{
           total: totalUsers,
-          current: filters.offset, // Текущая страница соответствует offset
+          current: filters.offset, 
           pageSize: filters.limit || 20,
           showSizeChanger: true,
           pageSizeOptions: ["10", "20", "50"],
