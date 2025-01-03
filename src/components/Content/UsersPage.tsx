@@ -37,7 +37,7 @@ const inputStyle = { width: 300 };
 const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [filters, setFilters] = useState<UserFilters>({ limit: 20, offset: 0 });
+  const [filters, setFilters] = useState<UserFilters>({ limit: 20, offset: 1 });
   const [isProfileModalVisible, setIsProfileModalVisible] =
     useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -51,7 +51,7 @@ const UsersPage: React.FC = () => {
     try {
       const response: MetaResponse<User> = await getUsers({
         ...updatedFilters,
-        limit: updatedFilters.limit || 20, 
+        limit: updatedFilters.limit || 20,
       });
       setUsers(response.data);
       setTotalUsers(response.meta.totalAmount);
@@ -74,7 +74,7 @@ const UsersPage: React.FC = () => {
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    updateFilters({ search: value, offset: 0 });
+    updateFilters({ search: value, offset: 1 });
   };
 
   const handleBlockFilterChange = (e: RadioChangeEvent) => {
@@ -82,7 +82,7 @@ const UsersPage: React.FC = () => {
     setBlockFilter(value);
     updateFilters({
       isBlocked: value === "all" ? undefined : value === "blocked",
-      offset: 0,
+      offset: 1,
     });
   };
 
@@ -93,8 +93,7 @@ const UsersPage: React.FC = () => {
   ) => {
     const sort = Array.isArray(sorter) ? sorter[0] : sorter;
     const { field, order } = sort || {};
-    const newOffset =
-      ((pagination.current || 1) - 1) * (pagination.pageSize || 20);
+    const newOffset = pagination.current || 1; // Используем номер текущей страницы как offset
     updateFilters({
       offset: newOffset,
       limit: pagination.pageSize || 20,
@@ -286,15 +285,15 @@ const UsersPage: React.FC = () => {
         loading={loading}
         pagination={{
           total: totalUsers,
-          current: filters.offset / filters.limit + 1,
+          current: filters.offset, // Текущая страница соответствует offset
           pageSize: filters.limit || 20,
           showSizeChanger: true,
-          pageSizeOptions: ["10"],
+          pageSizeOptions: ["10", "20", "50"],
         }}
         onChange={handleTableChange}
       />
       <Modal
-        visible={isProfileModalVisible}
+        open={isProfileModalVisible}
         title="Профиль пользователя"
         onCancel={() => setIsProfileModalVisible(false)}
         footer={null}
@@ -333,4 +332,5 @@ const UsersPage: React.FC = () => {
     </div>
   );
 };
+
 export default UsersPage;
