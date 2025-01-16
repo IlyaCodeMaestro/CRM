@@ -1,51 +1,55 @@
-import { Form, Input, Button, message, Checkbox } from "antd";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { authenticateUserThunk } from "../../slices/authSlice";
-import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
-import { RootState } from "../../store/store";
-import AuthLayout from "../Layout/AuthLayout";
+import { Form, Input, Button, message, Checkbox, Space, Typography } from "antd";
+import { Navigate, useNavigate } from "react-router-dom";
+import { AuthData } from "../../types/auth";
+import { loginUser } from "../../store/authActions";
+import axios from "axios";
+import { useAppDispatch } from "../../store/store";
 import { Link } from "react-router-dom";
 
 interface AuthFormValues {
-  login: string;
-  password: string;
-  rememberMe?: boolean;
+  isAuthenticated: boolean;
 }
 
-const AuthForm: React.FC = () => {
+const AuthForm: React.FC<AuthFormValues> = ({ isAuthenticated }) => {
   const [form] = Form.useForm();
-  const dispatch = useDispatch<ThunkDispatch<RootState, unknown, AnyAction>>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async (values: AuthFormValues) => {
+  const handleSubmit = async (values: AuthData) => {
     try {
-      const { login, password } = values;
-      await dispatch(authenticateUserThunk({ login, password })).unwrap();
-      message.success("Вход выполнен! Перенаправление на главную страницу...");
+      await dispatch(loginUser(values));
       navigate("/");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      message.error(errorMessage || "Произошла ошибка");
+      message.success("Вход выполнен! Перенаправление на главную страницу...");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data === "Invalid credentials\n") {
+          form.setFields([
+            { name: "password", errors: ["Неверные логин или пароль"] },
+          ]);
+        }
+      }
+      throw error;
     }
   };
 
-  return (
-    <AuthLayout
-      title="Вход"
-      footer={
-        <>
-         Нет аккаунта?{" "}
-         <Link to="/register">Создать аккаунт</Link>
-        </>
-      }
-    >
+  return isAuthenticated ? (
+    <Navigate to="/todo" replace />
+  ) : (
+    <>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
+      <Typography.Title level={1}>Форма входа</Typography.Title>
         <Form.Item
           label="Логин"
           name="login"
-          rules={[{ required: true, message: "Введите логин!" }]}
+          rules={[
+            { required: true, message: "Введите логин!" },
+            {
+              min: 2,
+              max: 60,
+              message: "Длина должна быть от 2 до 60 символов",
+            },
+            { pattern: /^[a-zA-Z]+$/, message: "Только латинские буквы" },
+          ]}
         >
           <Input />
         </Form.Item>
@@ -65,7 +69,11 @@ const AuthForm: React.FC = () => {
           </Button>
         </Form.Item>
       </Form>
-    </AuthLayout>
+      <Space>
+        <Typography.Text>Ещё не зарегистрированы?</Typography.Text>
+        <Link to={`/signup`}>Создать аккаунт</Link>
+      </Space>
+    </>
   );
 };
 

@@ -1,7 +1,12 @@
 import { Layout, Menu } from "antd";
-import { TeamOutlined, UnorderedListOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  TeamOutlined,
+  UnorderedListOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const { Content, Sider } = Layout;
 
@@ -37,28 +42,27 @@ const iconStyle: React.CSSProperties = {
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const isAdmin = useSelector((state: RootState)=>state.auth.profileInfo.profile?.isAdmin)
   const menuItems = [
     {
       label: <span style={labelStyle}>Список задач</span>,
-      key: "/",
+      key: "/todo",
       icon: <UnorderedListOutlined style={iconStyle} />,
-      onClick: () => navigate("/"),
+      onClick: () => navigate("/todo"),
     },
     {
       label: <span style={labelStyle}>Личный кабинет</span>,
       key: "/profile",
       icon: <UserOutlined style={iconStyle} />,
       onClick: () => navigate("/profile"),
-    },
-    {
-      label: <span style={labelStyle}>Пользователи</span>,
-      key: "/users",
-      icon: <TeamOutlined style={iconStyle} />,
-      onClick: () => navigate("/users"),
-    },
-  ];
- 
+    }]
+    if (isAdmin) {
+      menuItems.push({ label: <span style={labelStyle}>Пользователи</span>,
+        key: "/users",
+        icon: <TeamOutlined style={iconStyle} />,
+        onClick: () => navigate("/users"),})
+    }
+
 
   return (
     <Layout style={layoutStyles}>

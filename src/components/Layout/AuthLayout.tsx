@@ -1,60 +1,35 @@
-import { Typography, Layout, Row, Col, Space } from 'antd';
-import skeleton from "../../assets/images/skeleton.svg";
+import { Typography,  Flex, Image } from 'antd';
+import authImg from "../../assets/images/skeleton.svg";
+import { Outlet } from 'react-router-dom';
 
-const { Content } = Layout;
-const { Text, Title } = Typography;
-
-const pageStyle: React.CSSProperties = {
-  display: "flex",
-  height: "100vh",
-};
-
-const imageColumnStyle: React.CSSProperties = {
-  backgroundImage: `url(${skeleton})`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
+const container: React.CSSProperties = {
   height: '100vh',
 };
 
-const contentColumnStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+const leftColumnStyle: React.CSSProperties = {
+  width: '50%',
+  backgroundColor: '#FFE6C9',
+  color: '#73114B',
 };
 
-const formContainerStyle: React.CSSProperties = {
-  width: '400px',
-  padding: '20px',
-  border: '1px solid #ddd',
-  borderRadius: '8px',
-  backgroundColor: '#fff',
-  boxSizing: 'border-box',
+const rightColumnStyle: React.CSSProperties = {
+  width: '50%',
 };
 
-interface AuthLayoutProps {
-  children: React.ReactNode;
-  title: string;
-  footer: React.ReactNode;
-}
-
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, footer }) => {
+ const AuthLayout = () => {
   return (
-    <Layout style={pageStyle}>
-      <Row>
-        <Col span={12} style={imageColumnStyle} />
-        <Col span={12} style={contentColumnStyle}>
-          <Content>
-            <Space direction="vertical" style={formContainerStyle}>
-              <Title level={3}>{title}</Title>
-              {children}
-              <Text>{footer}</Text>
-            </Space>
-          </Content>
-        </Col>
-      </Row>
-    </Layout>
+    <Flex style={container}>
+      <Flex style={leftColumnStyle} vertical align="center" justify="center">
+        <Image src={authImg} preview={false} width={'40%'} />
+        <Typography.Title level={2}>Turn your ideas into reality.</Typography.Title>
+        <Typography>
+          Start for free and get attractive offers from the community
+        </Typography>
+      </Flex>
+      <Flex style={rightColumnStyle} vertical align="center" justify="center">
+        <Outlet />
+      </Flex>
+    </Flex>
   );
 };
-
-export default AuthLayout;
-
+export default AuthLayout

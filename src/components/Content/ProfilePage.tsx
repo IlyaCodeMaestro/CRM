@@ -1,107 +1,131 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Button, Typography, Spin, notification, Card } from "antd";
-import { Profile } from "../../types/auth";
-import { fetchUserProfile } from "../../api/authApi";
-import { logout } from "../../slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import { RootState, useAppDispatch } from "../../store/store";
+import { useSelector } from "react-redux";
+import { Card, Button, Typography, List } from "antd";
+import { User, Mail, Phone, LogOut } from "lucide-react";
+import { logoutUser } from "../../store/authActions";
 
-const { Title, Text } = Typography;
-
-const styles: { [key: string]: React.CSSProperties } = {
-  spinner: {
-    display: "block",
-    margin: "50px auto",
+const { Title, Paragraph } = Typography;
+const styles = {
+  container: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #e6f7ff 0%, #f0f2f5 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "20px",
+    borderRadius: "12px",
   },
   card: {
-    maxWidth: "600px",
-    margin: "50px auto",
+    width: "100%",
+    maxWidth: "400px",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+  },
+  header: {
+    textAlign: "center" as const,
+    padding: "24px",
+    borderRadius: "12px",
+    backgroundColor: "#c1c8c9",
+    color: "white",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+  },
+  title: {
+    fontSize: "24px",
+    marginBottom: "8px",
+  },
+  slogan: {
+    fontSize: "14px",
+  },
+  content: {
+    padding: "24px",
+  },
+  listItem: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "16px",
+  },
+  icon: {
+    marginRight: "8px",
+    color: "#1890ff",
+  },
+  label: {
+    fontWeight: "bold",
+    marginRight: "8px",
+  },
+  value: {
+    color: "#1890ff",
   },
   logoutButton: {
-    backgroundColor: "rgba(127, 38, 91, 1)",
-    marginTop: "20px",
+    width: "100%",
+    marginTop: "24px",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.5)",
   },
 };
-const ProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const dispatch = useDispatch();
+const ProfilePage = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const profile = useSelector(
+    (state: RootState) => state.auth.profileInfo.profile
+  );
 
-  useEffect(() => {
-    const getProfile = async () => {
-      try {
-        const fetchedProfile = await fetchUserProfile();
-        setProfile(fetchedProfile);
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Неизвестная ошибка";
-        console.error("Ошибка при загрузке профиля:", errorMessage);
-        setError(errorMessage);
-        notification.error({
-          message: "Ошибка загрузки профиля",
-          description: errorMessage,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  
 
-    getProfile();
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await dispatch(logout());
-      notification.success({
-        message: "Успешный выход",
-        description: "Вы успешно вышли из системы.",
-      });
-      navigate("/login");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Ошибка при выходе";
-      console.error("Ошибка при выходе из системы:", errorMessage);
-      notification.error({
-        message: "Ошибка выхода",
-        description: errorMessage,
-      });
-    }
-  };
+  const profileData = [
+    {
+      icon: <User style={styles.icon} />,
+      label: "Имя пользователя",
+      value: profile?.username,
+    },
+    {
+      icon: <Mail style={styles.icon} />,
+      label: "Почтовый адрес",
+      value: profile?.email,
+    },
+    {
+      icon: <Phone style={styles.icon} />,
+      label: "Телефон",
+      value: profile?.phoneNumber || "не указан",
+    },
+  ];
 
   return (
-    <>
-      {loading && <Spin size="large" style={styles.spinner} />}
-      {!loading && error && (
-        <Card style={styles.card}>
-          <Text type="danger">Ошибка: {error}</Text>
-        </Card>
-      )}
-      {!loading && !error && profile && (
-        <Card style={styles.card}>
-          <Title level={2}>Профиль пользователя</Title>
-          <Text strong>Имя пользователя:</Text> <Text>{profile.username}</Text>
-          <br />
-          <Text strong>Email:</Text> <Text>{profile.email}</Text>
-          <br />
-          <Text strong>Номер телефона:</Text> <Text>{profile.phoneNumber || "Не указан"}</Text>
-          <br />
-          <Text strong>Дата регистрации:</Text>{" "}
-          <Text>{new Date(profile.date).toLocaleDateString()}</Text>
-          <br />
-          <Button 
-            type="primary" 
-            onClick={handleLogout} 
+    <div style={styles.container}>
+      <Card style={styles.card}>
+        <div style={styles.header}>
+          <Title level={2} style={styles.title}>
+            Личный кабинет
+          </Title>
+          <Paragraph style={styles.slogan}>
+            Добро пожаловать в ваш персональный уголок!
+          </Paragraph>
+        </div>
+        <div style={styles.content}>
+          <List
+            itemLayout="horizontal"
+            dataSource={profileData}
+            renderItem={(item) => (
+              <List.Item style={styles.listItem}>
+                {item.icon}
+                <span style={styles.label}>{item.label}:</span>
+                <span style={styles.value}>{item.value}</span>
+              </List.Item>
+            )}
+          />
+          <Button
+            type="primary"
+            icon={<LogOut size={16} />}
             style={styles.logoutButton}
+            onClick={() => {
+              dispatch(logoutUser());
+              navigate("/");
+            }}
           >
-            Выйти
+            Выйти из системы
           </Button>
-        </Card>
-      )}
-    </>
+        </div>
+      </Card>
+    </div>
   );
 };
-
 
 export default ProfilePage;
