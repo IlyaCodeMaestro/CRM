@@ -7,18 +7,18 @@ import { fetchUsers } from "../../api/adminAPI/adminApi";
 import FilterList from "./FilterList";
 import UserActions from "./UserActions";
 
+interface TableParams {
+  pagination?: TablePaginationConfig;
+  sortField?: SorterResult<unknown>["field"];
+  sortOrder?: SorterResult<unknown>["order"];
+  filters?: Record<string, FilterValue | null>;
+}
+
 type ColumnsType<T extends object = object> = TableProps<T>["columns"];
 type TablePaginationConfig = Exclude<
   GetProp<TableProps, "pagination">,
   boolean
 >;
-
-interface TableParams {
-  pagination?: TablePaginationConfig;
-  sortField?: SorterResult<unknown>["field"];
-  sortOrder?: SorterResult<unknown>["order"];
-  filters?: Parameters<GetProp<TableProps, "onChange">>[1];
-}
 
 const styles = {
   container: {
@@ -121,7 +121,7 @@ const UsersPage = () => {
           ? tableParams.pagination.current - 1
           : undefined,
         sortBy: tableParams.sortField as string | undefined,
-        isBlocked: tableParams.filters?.isBlocked as boolean | undefined,
+        isBlocked: tableParams.filters?.isBlocked === 'true',
         search: searchText,
       });
       setData(response.data);
@@ -152,7 +152,7 @@ const UsersPage = () => {
 
     const intervalId = setInterval(getTableData, 60000);
     return () => clearInterval(intervalId);
-  }, [getTableData]);
+  }, [getTableData, searchText]);
 
   const onSearch: GetProps<typeof Input.Search>["onSearch"] = (value) => {
     setSearchText(value);
@@ -196,9 +196,9 @@ const UsersPage = () => {
           <div style={styles.filterSelect}>
             <FilterList
               onChange={(filter) => {
-                setTableParams((prev: any) => ({
+                setTableParams((prev) => ({
                   ...prev,
-                  filters: { isBlocked: filter },
+                  filters: { ...prev.filters, isBlocked: filter || null},
                   pagination: { ...tableParams.pagination, current: 1 },
                 }));
               }}
