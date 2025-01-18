@@ -6,18 +6,20 @@ import { User } from "../../types/users";
 import { fetchUsers } from "../../api/adminAPI/adminApi";
 import FilterList from "./FilterList";
 import UserActions from "./UserActions";
- 
+
+type ColumnsType<T extends object = object> = TableProps<T>["columns"];
+type TablePaginationConfig = Exclude<
+  GetProp<TableProps, "pagination">,
+  boolean
+>;
+
 interface TableParams {
   pagination?: TablePaginationConfig;
   sortField?: SorterResult<unknown>["field"];
   sortOrder?: SorterResult<unknown>["order"];
   filters?: Parameters<GetProp<TableProps, "onChange">>[1];
 }
-type ColumnsType<T extends object = object> = TableProps<T>["columns"];
-type TablePaginationConfig = Exclude<
-  GetProp<TableProps, "pagination">,
-  boolean
->;
+
 const styles = {
   container: {
     padding: "24px",
@@ -54,6 +56,7 @@ const styles = {
     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
   },
 };
+
 const UsersPage = () => {
   const [data, setData] = useState<User[]>();
   const [loading, setLoading] = useState(false);
@@ -61,6 +64,7 @@ const UsersPage = () => {
     filters: { isBlocked: null },
   });
   const [searchText, setSearchText] = useState<string>("");
+
   const columns: ColumnsType<User> = [
     {
       title: "Имя пользователя",
@@ -107,6 +111,7 @@ const UsersPage = () => {
       },
     },
   ];
+
   const getTableData = useCallback(async () => {
     try {
       setLoading(true);
@@ -141,17 +146,26 @@ const UsersPage = () => {
     tableParams.pagination?.current,
     tableParams.sortField,
   ]);
+
   useEffect(() => {
     getTableData();
+
     const intervalId = setInterval(getTableData, 60000);
     return () => clearInterval(intervalId);
   }, [getTableData, searchText]);
+
   const onSearch: GetProps<typeof Input.Search>["onSearch"] = (value) => {
     setSearchText(value);
+    setTableParams((prev) => ({
+      ...prev,
+      pagination: { ...prev.pagination, current: 1 },
+    }));
   };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearch(e.target.value);
   };
+
   const handleTableChange: TableProps<User>["onChange"] = (
     pagination,
     _,
@@ -164,6 +178,7 @@ const UsersPage = () => {
       sortField: Array.isArray(sorter) ? undefined : sorter.field,
     });
   };
+
   return (
     <div style={styles.container}>
       <Card style={styles.card}>
@@ -207,4 +222,6 @@ const UsersPage = () => {
     </div>
   );
 };
+
 export default UsersPage;
+
