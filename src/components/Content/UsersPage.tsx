@@ -17,7 +17,9 @@ interface TableParams {
   pagination?: TablePaginationConfig;
   sortField?: SorterResult<unknown>["field"];
   sortOrder?: SorterResult<unknown>["order"];
-  filters?: Parameters<GetProp<TableProps, "onChange">>[1];
+  filters?: {
+    isBlocked?: boolean | null;
+  };
 }
 
 const styles = {
@@ -199,11 +201,11 @@ const UsersPage = () => {
           />
           <div style={styles.filterSelect}>
             <FilterList
-              onChange={(filter) => {
-                setTableParams((prev: any) => ({
+              onChange={(filter: boolean | undefined) => {
+                setTableParams((prev: TableParams) => ({
                   ...prev,
-                  filters: { isBlocked: filter },
-                  pagination: { ...tableParams.pagination, current: 1 },
+                  filters: { isBlocked: filter === undefined ? null : filter },
+                  pagination: { ...prev.pagination, current: 1 },
                 }));
               }}
             />

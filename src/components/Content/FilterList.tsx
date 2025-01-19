@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { Dropdown, Menu, Radio, Button, Tooltip } from 'antd';
 
 interface FilterOption {
@@ -8,10 +8,10 @@ interface FilterOption {
 }
 
 interface FilterMenuProps {
-  onChange: (value: string | undefined) => void;
+  onChange: (value: boolean | undefined) => void;
 }
 
- const FilterMenu: React.FC<FilterMenuProps> = ({ onChange }) => {
+const FilterMenu: React.FC<FilterMenuProps> = ({ onChange }) => {
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>(undefined);
 
   const filterOptions: FilterOption[] = [
@@ -20,8 +20,8 @@ interface FilterMenuProps {
     { label: 'Активные', value: false },
   ];
 
-  const handleFilterChange = (value: string | undefined) => {
-    setSelectedFilter(value);
+  const handleFilterChange = (value: boolean | undefined) => {
+    setSelectedFilter(value === undefined ? 'Все' : value ? 'Заблокированные' : 'Активные');
     onChange(value);
   };
 
@@ -42,13 +42,11 @@ interface FilterMenuProps {
   return (
     <Dropdown overlay={menu} trigger={['click']}>
       <Button>
-        {selectedFilter
-          ? selectedFilter
-            ? 'Заблокированные'
-            : 'Активные'
-          : 'Выберите фильтр'}
+        {selectedFilter || 'Выберите фильтр'}
       </Button>
     </Dropdown>
   );
 };
-export default FilterMenu
+
+export default FilterMenu;
+
