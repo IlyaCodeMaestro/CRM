@@ -15,7 +15,7 @@ const getString = (filters: UserFilters): string => {
         `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
     )
     .join("&");
-  }
+};
 
 export const fetchUsers = async (
   filters: UserFilters
