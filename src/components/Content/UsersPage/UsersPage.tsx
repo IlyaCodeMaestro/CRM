@@ -12,10 +12,10 @@ type ColumnsType<T extends object = object> = TableProps<T>["columns"]
 type TablePaginationConfig = Exclude<GetProp<TableProps, "pagination">, boolean>
 
 interface TableParams {
-  pagination?: TablePaginationConfig
-  sortField?: SorterResult<unknown>["field"]
-  sortOrder?: SorterResult<unknown>["order"]
-  filters?: Parameters<GetProp<TableProps, "onChange">>[1]
+  pagination?: TablePaginationConfig;
+  sortField?: SorterResult<unknown>["field"];
+  sortOrder?: SorterResult<unknown>["order"];
+  filters?: Parameters<GetProp<TableProps, "onChange">>[1];
 }
 
 const UsersPage = () => {
@@ -144,12 +144,12 @@ const UsersPage = () => {
           />
           <div className={styles.filterSelect}>
             <FilterList
-              onChange={(filter) => {
-                setTableParams((prev: any) => ({
+              onChange={(filter: boolean | undefined) => {
+                setTableParams((prev: TableParams) => ({
                   ...prev,
                   filters: { isBlocked: filter },
                   pagination: { ...tableParams.pagination, current: 1 },
-                }))
+                }));
               }}
             />
           </div>
