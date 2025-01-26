@@ -36,8 +36,8 @@ export interface UserRegistration {
   }
   
   export interface Token {
-    access: string;
-    refresh: string;
+    accessToken: string;
+    refreshToken: string
   }
   
   
