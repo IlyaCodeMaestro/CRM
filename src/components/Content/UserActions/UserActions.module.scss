@@ -1,0 +1,44 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+  
+  .button {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    &.profile {
+      background-color: #1890ff;
+      color: white;
+    }
+  
+    &.delete {
+      background-color: #ff4d4f;
+      color: white;
+    }
+  
+    &.block {
+      background-color: #faad14;
+      color: white;
+    }
+  
+    &.admin {
+      background-color: #52c41a;
+      color: white;
+    }
+  }
+  
+  .modalContent {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  
+  
